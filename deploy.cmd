@@ -57,6 +57,22 @@ IF DEFINED CLEAN_LOCAL_DEPLOYMENT_TEMP (
   mkdir "%DEPLOYMENT_TEMP%"
 )
 
+:: Installing NPM dependencies.
+IF EXIST "%DEPLOYMENT_SOURCE%\ClientApp\package.json" (
+  pushd "%DEPLOYMENT_SOURCE%\ClientApp"
+  call npm install --save
+  IF !ERRORLEVEL! NEQ 0 goto error
+  popd
+)
+
+:: Building the Angular App
+IF EXIST "%DEPLOYMENT_SOURCE%\ClientApp\.angular-cli.json" (
+  pushd "%DEPLOYMENT_SOURCE%\ClientApp"
+  call :ExecuteCmd node_modules\.bin\ng build --progress false --prod
+  IF !ERRORLEVEL! NEQ 0 goto error
+  popd
+)
+
 IF DEFINED MSBUILD_PATH goto MsbuildPathDefined
 SET MSBUILD_PATH=%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe
 :MsbuildPathDefined
